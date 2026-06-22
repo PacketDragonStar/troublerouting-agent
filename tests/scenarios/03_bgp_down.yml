@@ -1,0 +1,15 @@
+# 场景 3: BGP Peer Down
+fault: "核心路由器 BGP peer 10.0.0.3 断了"
+devices:
+  - ip: "10.0.0.2"
+    hostname: "core-router-1"
+    vendor: "cisco"
+    role: "core"
+mock_data:
+  "10.0.0.2":
+    - command: "show ip bgp summary"
+      raw_output: "Neighbor 10.0.0.3 state Idle, BGP notification sent"
+      success: true
+expected:
+  root_cause_contains: "BGP"
+  min_confidence: 0.6

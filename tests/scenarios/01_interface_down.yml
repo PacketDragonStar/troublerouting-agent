@@ -1,0 +1,18 @@
+# 场景 1: 接口 Down
+fault: "核心交换机 10.0.0.1 接口 Gi0/1 down 了"
+devices:
+  - ip: "10.0.0.1"
+    hostname: "core-sw-1"
+    vendor: "cisco"
+    role: "core"
+mock_data:
+  "10.0.0.1":
+    - command: "show interface"
+      raw_output: "GigabitEthernet0/1 is down, line protocol is down"
+      success: true
+    - command: "show version"
+      raw_output: "Cisco IOS Version 15.2"
+      success: true
+expected:
+  root_cause_contains: "DOWN"
+  min_confidence: 0.6

@@ -1,0 +1,18 @@
+# 场景 4: DHCP 故障
+fault: "接入交换机 10.0.0.10 下用户获取不到 DHCP 地址"
+devices:
+  - ip: "10.0.0.10"
+    hostname: "acc-sw-1"
+    vendor: "huawei"
+    role: "access"
+mock_data:
+  "10.0.0.10":
+    - command: "display interface"
+      raw_output: "GigabitEthernet0/0/1 current state : UP"
+      success: true
+    - command: "display logbuffer"
+      raw_output: "DHCP server unreachable"
+      success: true
+expected:
+  root_cause_contains: ""
+  min_confidence: 0.4

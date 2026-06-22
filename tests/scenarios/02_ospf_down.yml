@@ -1,0 +1,15 @@
+# 场景 2: OSPF Neighbor Down
+fault: "核心路由器 10.0.0.2 OSPF 邻居断了"
+devices:
+  - ip: "10.0.0.2"
+    hostname: "core-router-1"
+    vendor: "cisco"
+    role: "core"
+mock_data:
+  "10.0.0.2":
+    - command: "show ip ospf neighbor"
+      raw_output: "Neighbor ID 10.0.0.1, state DOWN, Dead timer expired"
+      success: true
+expected:
+  root_cause_contains: "OSPF"
+  min_confidence: 0.6

@@ -53,10 +53,14 @@ class Diagnostician:
             # 分析每条命令输出
             for r in results:
                 raw = r.get("raw_output", "")
+                cmd = r.get("command", "").lower()
                 if not isinstance(raw, str):
                     continue
                 raw_lower = raw.lower()
+                # combined: 命令名 + 输出，用于 OSPF/BGP 等命令名中包含关键词的场景
+                combined = cmd + " " + raw_lower
 
+                # CRC 错误
                 if "crc" in raw_lower:
                     nums = re.findall(r"\d+", raw)
                     crc_count = int(nums[0]) if nums else 0
@@ -67,7 +71,28 @@ class Diagnostician:
                         session_id=session_id,
                     )
 
-                if "current state : down" in raw_lower or ("down" in raw_lower and "interface" in raw_lower):
+                # BGP 检测（命令名或输出含 bgp + idle/active/notification）
+                if "bgp" in combined and ("idle" in raw_lower or "active" in raw_lower or "notification" in raw_lower):
+                    return DiagnosisResult(
+                        root_cause="BGP Peer 未建立——可能原因：AS Number 错误、TCP 179 不通、邻居 IP 不可达",
+                        confidence=0.78,
+                        evidence=[f"{device_ip}: BGP Peer 异常"],
+                        session_id=session_id,
+                    )
+
+                # OSPF 检测
+                if "ospf" in combined and ("down" in raw_lower or "init" in raw_lower or "dead" in raw_lower):
+                    return DiagnosisResult(
+                        root_cause="OSPF 邻居状态异常——可能原因：Hello 参数不匹配、MTU 不一致、认证失败",
+                        confidence=0.75,
+                        evidence=[f"{device_ip}: OSPF 邻居异常"],
+                        session_id=session_id,
+                    )
+
+                # 接口 Down 检测（多种模式）
+                if ("current state : down" in raw_lower
+                        or "line protocol is down" in raw_lower
+                        or ("down" in raw_lower and "interface" in combined)):
                     return DiagnosisResult(
                         root_cause="接口状态为 DOWN——可能原因：对端故障、线缆断开、管理性 shutdown",
                         confidence=0.80,

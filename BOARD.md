@@ -54,9 +54,10 @@
   完成 commit: 3798406
   - 依赖：Ticket 6（需要完整 6 Agent 流程产出）
 
-- [ ] **Ticket 8: 外部状态存储 + 上下文管理**
+- [x] **Ticket 8: 外部状态存储 + 上下文管理**
   建 SQLite 表：`fault_sessions`（故障摘要）、`collected_data`（设备数据）、`diagnosis`（诊断结论）。改造 Agent：不从对话历史读数据，统一从 DB 取。对话历史仅存推理链。
   验收：Agent 发言前后数据正确读写 DB；大日志场景（10KB+ CLI 输出）下上下文不超过 50% 上限。
+  完成 commit: cf88d0b
   - 依赖：Ticket 0（环境配置）、Ticket 2（需在 Agent 骨架注入 DB 读写层）
 
 - [ ] **Ticket 9: 场景剧本 + 自动化回归测试**

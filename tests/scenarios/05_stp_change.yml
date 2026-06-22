@@ -1,0 +1,18 @@
+# 场景 5: STP 拓扑变化
+fault: "核心交换机 10.0.0.1 STP 拓扑变化导致网络中断"
+devices:
+  - ip: "10.0.0.1"
+    hostname: "core-sw-1"
+    vendor: "cisco"
+    role: "core"
+mock_data:
+  "10.0.0.1":
+    - command: "show spanning-tree"
+      raw_output: "VLAN0001 STP topology change, Bridge Priority changed"
+      success: true
+    - command: "show interface"
+      raw_output: "GigabitEthernet0/1 is up, line protocol is up"
+      success: true
+expected:
+  root_cause_contains: ""
+  min_confidence: 0.4
