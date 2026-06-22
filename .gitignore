@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables (contains secrets)
+.env
+
+# Data
+data/*.db
+logs/*.log
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Reports output
+reports/
+
+# Docker
+docker-compose.override.yml
