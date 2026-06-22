@@ -60,9 +60,10 @@
   完成 commit: cf88d0b
   - 依赖：Ticket 0（环境配置）、Ticket 2（需在 Agent 骨架注入 DB 读写层）
 
-- [ ] **Ticket 9: 场景剧本 + 自动化回归测试**
+- [x] **Ticket 9: 场景剧本 + 自动化回归测试**
   写 5 个 YAML 场景剧本（接口Down/OSPF/BGP/DHCP/STP），含 setup/trigger/expected/rollback。测试 Runner：自动执行设备快照恢复 → 注入故障 → 运行 Agent → 比对 expected。每个场景可独立运行。
   验收：`pytest tests/scenarios/` 5 个测试全部通过，预期根因匹配实际输出。
+  完成 commit: a328482
   - 依赖：Ticket 7（需要完整流程可跑通）、eNSP/HCL 环境就绪（用户自行搭建）
 
 - [ ] **Ticket 10: LLM 降级 + 故障恢复**
