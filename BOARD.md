@@ -7,9 +7,10 @@
 
 ## Phase 1：Demo 交付（13 Tickets）
 
-- [ ] **Ticket 0: 项目脚手架 + Docker 底座 + 扩展接口**
+- [x] **Ticket 0: 项目脚手架 + Docker 底座 + 扩展接口**
   搭项目目录结构、`pyproject.toml`、`docker-compose.yml`（Redis + Chroma）、环境变量配置（`REDIS_HOST`/`CHROMA_HOST`/`LLM_API_KEY`）。预埋扩展接口：`DeviceAdapter` 抽象基类、`ScenarioRegistry`、`AsyncDevicePool`、`TroubleshootingPipeline`（Strategy 模式）。
   验收：`docker-compose up -d` 启动 Redis + Chroma；`python -c "from agent import TroubleshootingPipeline"` 无报错；扩展接口为抽象类/Protocol，不实例化。
+  完成 commit: 92df138
   - 依赖：无
 
 - [ ] **Ticket 1: MCP 工具层搭建 + 命令安全白名单**
