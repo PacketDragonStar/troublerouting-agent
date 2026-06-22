@@ -13,9 +13,10 @@
   完成 commit: 92df138
   - 依赖：无
 
-- [ ] **Ticket 1: MCP 工具层搭建 + 命令安全白名单**
+- [x] **Ticket 1: MCP 工具层搭建 + 命令安全白名单**
   交付 MCP Server 骨架：命令白名单（正则+黑名单子串）、只读命名空间（`network.readonly`）、审计日志。不涉及实际网络设备，用 Mock 验证拦截逻辑。
   验收：白名单放行 `show interface`，拦截 `conf t`/`reload`/含 `tftp` 命令。
+  完成 commit: 69545d4
 
 - [ ] **Ticket 2: AutoGen GroupChat 骨架 + 6 Agent 空壳注册**
   搭 AutoGen 项目骨架，注册 6 个 Agent（Dispatcher/Investigator/Diagnostician/Solution/Safety/Reporter），Manager 硬编码发言顺序。Agent 暂时只 echo 角色名。
