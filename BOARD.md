@@ -48,9 +48,10 @@
   完成 commit: b1398ed
   - 依赖：Ticket 5（需要 Diagnostician 输出作为输入）
 
-- [ ] **Ticket 7: Reporter Agent + 案例草稿生成**
+- [x] **Ticket 7: Reporter Agent + 案例草稿生成**
   实现 Reporter（汇总全流程数据 → 输出 Markdown 报告）。生成案例草稿（症状/推理链/结论/操作），标记 `confirmed=false`。Webhook 通知模拟。
   验收：完整流程后输出 `report_<session_id>.md` + 案例草稿 JSON。
+  完成 commit: 3798406
   - 依赖：Ticket 6（需要完整 6 Agent 流程产出）
 
 - [ ] **Ticket 8: 外部状态存储 + 上下文管理**
