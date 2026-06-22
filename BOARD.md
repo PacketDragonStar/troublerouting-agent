@@ -72,9 +72,10 @@
   完成 commit: 60750fe
   - 依赖：Ticket 7（需要完整流程才能验证降级后继续）
 
-- [ ] **Ticket 11: 案例库闭环（人工复盘接口）**
+- [x] **Ticket 11: 案例库闭环（人工复盘接口）**
   案例草稿 → 「待复盘」状态 → 人工确认 API（`PATCH /cases/{id}/confirm`）→ Chroma 向量化入库（`confirmed=true`）。检索接口：按症状向量返回 Top-K 案例。
   验收：确认案例后，下一次类似故障 Diagnostician 能在 Top-3 中检索到该案例。
+  完成 commit: e890fe5
   - 依赖：Ticket 7（Reporter 生成案例草稿）、Ticket 5（Chroma 库已搭建）
 
 - [ ] **Ticket 12: E2E 集成验证 + Demo 跑分**
