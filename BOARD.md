@@ -30,9 +30,10 @@
   完成 commit: 3e798ac
   - 依赖：Ticket 2（需要 GroupChat 骨架才能注册 Dispatcher）
 
-- [ ] **Ticket 4: Investigator Agent + 并行数据收集**
+- [x] **Ticket 4: Investigator Agent + 并行数据收集**
   实现 Investigator 完整提示词（工具绑定、摘要义务）。实现并行执行器：一次对多台设备发出 ping/show/CPU/内存/日志。超时控制（Fast 2s/5s，Slow 5s/15s）。设备不可达标记为 `unreachable`。ntc-templates TextFSM 解析 + net-inspect 归一化 + LLM 兜底。先接 eNSP/HCL 虚拟设备验证。
   验收：并行 5 条命令，30 秒内返回结构化数据（CRC/CPU/内存/状态）+ 异常行 + 原始数据引用 ID。
+  完成 commit: b6f0495
   - 依赖：Ticket 0（扩展接口 DeviceAdapter）、Ticket 1（MCP 工具层提供命令执行接口）、Ticket 3（Dispatcher 输出目标设备列表）
 
 - [ ] **Ticket 5: Diagnostician Agent + 重规划循环**
