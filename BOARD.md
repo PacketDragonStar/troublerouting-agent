@@ -18,9 +18,10 @@
   验收：白名单放行 `show interface`，拦截 `conf t`/`reload`/含 `tftp` 命令。
   完成 commit: 69545d4
 
-- [ ] **Ticket 2: AutoGen GroupChat 骨架 + 6 Agent 空壳注册**
+- [x] **Ticket 2: AutoGen GroupChat 骨架 + 6 Agent 空壳注册**
   搭 AutoGen 项目骨架，注册 6 个 Agent（Dispatcher/Investigator/Diagnostician/Solution/Safety/Reporter），Manager 硬编码发言顺序。Agent 暂时只 echo 角色名。
   验收：`python main.py "测试故障"` 后 6 Agent 按顺序发言，Redis 持久化对话状态。
+  完成 commit: abeaf73
   - 依赖：Ticket 0（环境配置）、Ticket 1（MCP 工具注册需要工具层存在）
 
 - [ ] **Ticket 3: Dispatcher Agent + CMDB 分流器**
