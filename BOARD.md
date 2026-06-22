@@ -24,9 +24,10 @@
   完成 commit: abeaf73
   - 依赖：Ticket 0（环境配置）、Ticket 1（MCP 工具注册需要工具层存在）
 
-- [ ] **Ticket 3: Dispatcher Agent + CMDB 分流器**
+- [x] **Ticket 3: Dispatcher Agent + CMDB 分流器**
   实现 Dispatcher 完整提示词（提取设备/时间/现象，不诊断）。实现分流规则引擎（查 CMDB 设备角色 → Fast Path 或 Slow Path）。CMDB 先用 SQLite 模拟。
   验收：输入"核心交换机 10.0.0.1 OSPF 邻居断了" → Dispatcher 输出结构化摘要 + 路由到 Slow Path；输入"接入交换机端口 down" → Fast Path。
+  完成 commit: 3e798ac
   - 依赖：Ticket 2（需要 GroupChat 骨架才能注册 Dispatcher）
 
 - [ ] **Ticket 4: Investigator Agent + 并行数据收集**
