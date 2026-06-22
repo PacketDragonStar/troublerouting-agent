@@ -36,9 +36,10 @@
   完成 commit: b6f0495
   - 依赖：Ticket 0（扩展接口 DeviceAdapter）、Ticket 1（MCP 工具层提供命令执行接口）、Ticket 3（Dispatcher 输出目标设备列表）
 
-- [ ] **Ticket 5: Diagnostician Agent + 重规划循环**
+- [x] **Ticket 5: Diagnostician Agent + 重规划循环**
   实现 Diagnostician 提示词（综合分析症状/拓扑/案例）。接入 Chroma 向量库（初始为空，支持后续案例注入）。CMDB 拓扑查询。置信度评分。重规划逻辑：置信度 < 60% → 要求 Investigator 补充数据（最多 3 次/每轮补查≤2 次）。
   验收：给定 Investigator 输出 → Diagnostician 输出根因 + 置信度 > 60%（或触发重规划）。
+  完成 commit: 5db1aa6
   - 依赖：Ticket 4（需要 Investigator 输出作为输入）
 
 - [ ] **Ticket 6: Solution Engineer + Safety Officer 规则引擎**
