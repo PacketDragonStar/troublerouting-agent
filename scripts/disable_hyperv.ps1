@@ -1,19 +1,19 @@
 # ============================================================
-# disable_hyperv.ps1 — 关闭 Hyper-V 模式
+# disable_hyperv.ps1 - Switch to Network Simulator Mode
 # ============================================================
-# 适用场景：你要用 HCL、eNSP、EVE-NG（VirtualBox 模拟器）
-# 不适用：Docker Desktop、WSL2
-# 运行后需要重启电脑才能生效
+# Use this when: HCL / eNSP / EVE-NG (VirtualBox-based)
+# Do NOT use when: Docker Desktop / WSL2
+# Requires reboot to take effect
 # ============================================================
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  切换到 网络模拟器 模式" -ForegroundColor Cyan
-Write-Host "  适用：HCL / eNSP / EVE-NG" -ForegroundColor Green
-Write-Host "  不适用：Docker Desktop / WSL2" -ForegroundColor Red
+Write-Host "  Switch to: Network Simulator Mode" -ForegroundColor Cyan
+Write-Host "  Works with: HCL / eNSP / EVE-NG" -ForegroundColor Green
+Write-Host "  Breaks: Docker Desktop / WSL2" -ForegroundColor Red
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. 关闭 Hyper-V 相关 Windows 功能
+# 1. Disable Hyper-V related Windows features
 $features = @(
     "Microsoft-Hyper-V-All",
     "VirtualMachinePlatform",
@@ -21,23 +21,23 @@ $features = @(
 )
 
 foreach ($feature in $features) {
-    Write-Host "[*] 禁用 Windows 功能: $feature" -ForegroundColor Yellow
+    Write-Host "[*] Disabling Windows feature: $feature" -ForegroundColor Yellow
     dism /online /disable-feature /featurename:$feature /norestart | Out-Null
 }
 
-# 2. 设置 BCD 启动项——禁用 Hypervisor
-Write-Host "[*] 配置启动项: 禁用 Hypervisor" -ForegroundColor Yellow
+# 2. Configure BCD - disable Hypervisor
+Write-Host "[*] Configuring boot entry: disable Hypervisor" -ForegroundColor Yellow
 bcdedit /set hypervisorlaunchtype off
 
-# 3. 结果
+# 3. Result
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  配置完成！请重启电脑使模拟器可用。" -ForegroundColor Green
-Write-Host "  重启后 HCL / eNSP / EVE-NG 可以正常使用。" -ForegroundColor Green
-Write-Host "  但 Docker Desktop 将无法启动。" -ForegroundColor Yellow
+Write-Host "  Done. Please reboot for changes to take effect." -ForegroundColor Green
+Write-Host "  After reboot: HCL / eNSP / EVE-NG will work." -ForegroundColor Green
+Write-Host "  After reboot: Docker Desktop will NOT work." -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Green
 
-$restart = Read-Host "是否现在重启？(y/n)"
+$restart = Read-Host "Reboot now? (y/n)"
 if ($restart -eq "y") {
     Restart-Computer -Force
 }

@@ -1,19 +1,19 @@
 # ============================================================
-# enable_hyperv.ps1 — 开启 Hyper-V 模式
+# enable_hyperv.ps1 - Switch to Docker Desktop Mode
 # ============================================================
-# 适用场景：你要用 Docker Desktop、WSL2
-# 不适用：HCL、eNSP、EVE-NG（VirtualBox 模拟器会异常）
-# 运行后需要重启电脑才能生效
+# Use this when: Docker Desktop / WSL2
+# Do NOT use when: HCL / eNSP / EVE-NG (VirtualBox-based)
+# Requires reboot to take effect
 # ============================================================
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  切换到 Hyper-V 模式" -ForegroundColor Cyan
-Write-Host "  适用：Docker Desktop / WSL2" -ForegroundColor Green
-Write-Host "  不适用：HCL / eNSP / EVE-NG" -ForegroundColor Red
+Write-Host "  Switch to: Docker Desktop Mode" -ForegroundColor Cyan
+Write-Host "  Works with: Docker Desktop / WSL2" -ForegroundColor Green
+Write-Host "  Breaks: HCL / eNSP / EVE-NG" -ForegroundColor Red
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. 开启 Hyper-V 相关 Windows 功能
+# 1. Enable Hyper-V related Windows features
 $features = @(
     "Microsoft-Hyper-V-All",
     "VirtualMachinePlatform",
@@ -21,22 +21,23 @@ $features = @(
 )
 
 foreach ($feature in $features) {
-    Write-Host "[*] 启用 Windows 功能: $feature" -ForegroundColor Yellow
+    Write-Host "[*] Enabling Windows feature: $feature" -ForegroundColor Yellow
     dism /online /enable-feature /featurename:$feature /norestart | Out-Null
 }
 
-# 2. 设置 BCD 启动项——启用 Hypervisor
-Write-Host "[*] 配置启动项: 启用 Hypervisor" -ForegroundColor Yellow
+# 2. Configure BCD - enable Hypervisor
+Write-Host "[*] Configuring boot entry: enable Hypervisor" -ForegroundColor Yellow
 bcdedit /set hypervisorlaunchtype auto
 
-# 3. 结果
+# 3. Result
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  配置完成！请重启电脑使 Hyper-V 生效。" -ForegroundColor Green
-Write-Host "  重启后 Docker Desktop 可以正常使用。" -ForegroundColor Green
+Write-Host "  Done. Please reboot for changes to take effect." -ForegroundColor Green
+Write-Host "  After reboot: Docker Desktop will work." -ForegroundColor Green
+Write-Host "  After reboot: HCL / eNSP / EVE-NG will NOT work." -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Green
 
-$restart = Read-Host "是否现在重启？(y/n)"
+$restart = Read-Host "Reboot now? (y/n)"
 if ($restart -eq "y") {
     Restart-Computer -Force
 }
