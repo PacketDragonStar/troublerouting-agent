@@ -76,6 +76,43 @@ def get_entries(self, session_id: Optional[str] = None):
 
 ## 2. 运行环境相关
 
+### 问题：eNSP 报“VirtualBox 版本不支持”
+
+**原因：** eNSP 官方只兼容 VirtualBox 5.2.x，系统安装的 6.x 或 7.x 版本不被识别。
+
+**解决方案（三选一）：**
+- **降级 VirtualBox**：卸载当前版本，安装 VirtualBox 5.2.44（注意：其他依赖新 VB 的工具可能受影响）
+- **换 HCL（推荐）**：HCL 对 VirtualBox 版本要求更宽松（支持 6.x/7.x），且华为/华三镜像通用
+- **用 EVE-NG**：在 VMware 里运行，完全不依赖 VirtualBox 版本
+
+本项目 Demo 阶段推荐 HCL。
+
+---
+
+### 问题：HCL 和 Docker Desktop 无法同时运行（Hyper-V 冲突）
+
+**原因：** HCL 底层用 VirtualBox，需要独占 CPU 虚拟化拓展（VT-x/AMD-V），必须关闭 Windows 功能「Hyper-V」「虚拟机平台」「Windows 虚拟机监控程序平台」。但 Docker Desktop 依赖这些功能（通过 WSL2），关闭后 Docker 不可用。
+
+**解决方案（三选一）：**
+
+**方案一：Docker 底座换成 Windows 原生安装（推荐，改动最小）**
+- Redis：下载 [tporadowski/redis](https://github.com/tporadowski/redis/releases) 的 `.msi` 安装包，一键安装，默认 `localhost:6379`
+- Chroma：`pip install chromadb && chroma run --path ./chroma_data`，监听 `localhost:8000`
+- Agent 代码无需修改——`REDIS_HOST=localhost` 保持不变
+- 此方案下可以关掉 Hyper-V，HCL + Redis + Chroma + Agent 全部共存
+
+**方案二：换用支持 Hyper-V 的模拟器**
+- eNSP（华为）有 Hyper-V 兼容版本
+- EVE-NG（社区版）可在 VMware 里跑，与 Hyper-V 不冲突
+- Agent 代码无需修改（DeviceAdapter 抽象层），只需更新 CMDB 中的设备 IP
+
+**方案三：双机分离**
+- 一台机器（或 Hyper-V 虚拟机）装 HCL，关掉该虚拟机的 Hyper-V
+- 宿主机保持 Docker Desktop 正常运行
+- Agent 跨网络 SSH 到 HCL 虚拟设备
+
+---
+
 ### 问题：`docker-compose up -d` 起不来
 
 **原因：** Redis 端口 6379 或 Chroma 端口 8001 被占用。
