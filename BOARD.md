@@ -94,8 +94,10 @@
   完成 commit: 428ced0
   - 依赖：Ticket 4（Investigator）
 
-- [ ] Ticket 13: TACACS+ 命令授权替代正则白名单
+- [x] **Ticket 13: TACACS+ 命令授权替代正则白名单**
   双层防护：本地正则白名单（第一道） + TACACS+ 远程授权（第二道）。TACACS+ 不可用时降级为正则结果。
+  验收：`tests/test_tacacs.py` 13 passed.
+  完成 commit: c05ecf4
   - 依赖：Ticket 20（Netmiko）
 
 - [ ] Ticket 19: RAG 知识库（Chroma 向量检索落地）
