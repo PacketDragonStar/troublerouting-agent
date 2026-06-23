@@ -86,9 +86,22 @@
 
 ---
 
-## Phase 2：生产化（待启动）
+## Phase 2：生产化
+
+- [x] **Ticket 20: Netmiko 真实设备接入**
+  替换 Investigator Mock 为 Netmiko SSH 真实执行，支持三厂商 device_type 映射，白名单校验保留，不可达自动降级 Mock。
+  验收：`tests/test_netmiko.py` 6 passed, 3 skipped（真实设备测试需配置 `DEVICE_USER` 环境变量）。
+  完成 commit: 428ced0
+  - 依赖：Ticket 4（Investigator）
 
 - [ ] Ticket 13: TACACS+ 命令授权替代正则白名单
+  双层防护：本地正则白名单（第一道） + TACACS+ 远程授权（第二道）。TACACS+ 不可用时降级为正则结果。
+  - 依赖：Ticket 20（Netmiko）
+
+- [ ] Ticket 19: RAG 知识库（Chroma 向量检索落地）
+  CaseLibrary.search() 从子串匹配升级为 Chroma 语义检索，接入 Embedding 模型，confirm() 自动向量化入库。Chroma 不可用时降级子串匹配。
+  - 依赖：Ticket 11（CaseLibrary）
+
 - [ ] Ticket 14: Deep Agents 框架迁移评估与 POC
 - [ ] Ticket 15: Docker Compose / K8s 容器化部署
 - [ ] Ticket 16: 真实工单系统（ServiceNow/Jira）对接
