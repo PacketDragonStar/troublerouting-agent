@@ -78,9 +78,10 @@
   完成 commit: e890fe5
   - 依赖：Ticket 7（Reporter 生成案例草稿）、Ticket 5（Chroma 库已搭建）
 
-- [ ] **Ticket 12: E2E 集成验证 + Demo 跑分**
+- [x] **Ticket 12: E2E 集成验证 + Demo 跑分**
   跑通 5 个场景的完整 E2E 流程（自然语言输入 → 6 Agent → 报告）。度量指标：Fast Path < 30s、Slow Path < 5min、置信度达标率。输出 Demo 演示文档。
   验收：5 个场景全部通过，性能指标达标，可对外演示。
+  完成 commit: 58caf02
   - 依赖：Ticket 9（场景剧本）、Ticket 10（降级可用）、Ticket 11（案例库可用）
 
 ---
