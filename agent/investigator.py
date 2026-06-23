@@ -5,10 +5,28 @@
 """
 
 import asyncio
+import os
+import socket
 from dataclasses import dataclass
 from typing import Any
+from concurrent.futures import ThreadPoolExecutor
 
 from .device_adapter import DeviceInfo
+
+
+# ---- Netmiko 设备类型映射 ----
+
+DEVICE_TYPE_MAP: dict[str, str] = {
+    "cisco": "cisco_ios",
+    "huawei": "huawei_vrpv8",
+    "h3c": "hp_comware",
+    "juniper": "juniper_junos",
+}
+
+
+def get_device_type(vendor: str) -> str:
+    """将项目内部 vendor 名映射为 Netmiko device_type"""
+    return DEVICE_TYPE_MAP.get(vendor.lower(), "cisco_ios")
 
 
 # ---- 厂商命令模板 ----
@@ -99,17 +117,30 @@ class Investigator:
     async def _collect_from_device(
         self, device: DeviceInfo, commands: list[str], timeout: float,
     ) -> list[dict[str, Any]]:
-        """从单台设备收集数据"""
-        coros = [
-            self._execute_single_command(device, cmd, timeout)
-            for cmd in commands
+        """从单台设备收集数据（使用线程池执行同步 Netmiko）"""
+        loop = asyncio.get_running_loop()
+        with ThreadPoolExecutor(max_workers=len(commands)) as pool:
+            futures = [
+                loop.run_in_executor(
+                    pool, self._execute_single_command, device, cmd, timeout
+                )
+                for cmd in commands
+            ]
+            results = await asyncio.gather(*futures, return_exceptions=True)
+        return [
+            r if not isinstance(r, Exception) else {
+                "device": device.ip, "command": "",
+                "raw_output": "", "success": False,
+                "error": str(r), "unreachable": True,
+            }
+            for r in results
         ]
-        return await asyncio.gather(*coros, return_exceptions=True)
 
-    async def _execute_single_command(
+    def _execute_single_command(
         self, device: DeviceInfo, command: str, timeout: float,
     ) -> dict[str, Any]:
-        """执行单条命令——Demo 阶段 Mock"""
+        """执行单条命令——优先用 Netmiko 真实连接，失败时退化为 Mock"""
+        # 白名单校验
         check = self.whitelist.check(command)
         if not check.allowed:
             return {
@@ -117,12 +148,64 @@ class Investigator:
                 "raw_output": "", "success": False,
                 "error": check.reason, "blocked": True,
             }
-        await asyncio.sleep(0.01)
+
+        # 尝试 Netmiko 真实连接（只在有凭证时）
+        if os.getenv("DEVICE_USER"):
+            try:
+                return self._execute_single_command_real(device, command, timeout)
+            except Exception:
+                pass
+
+        # 降级为 Mock
         return {
             "device": device.ip, "command": command,
             "raw_output": f"Mock output: {command} on {device.hostname}",
             "success": True, "error": "",
         }
+
+    def _execute_single_command_real(
+        self, device: DeviceInfo, command: str, timeout: float,
+    ) -> dict[str, Any]:
+        """Netmiko 真实设备执行（必须配置 DEVICE_USER 环境变量）"""
+        from netmiko import ConnectHandler
+        from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
+
+        dt = get_device_type(device.vendor)
+        params = {
+            "device_type": dt,
+            "host": device.ip,
+            "username": os.getenv("DEVICE_USER", ""),
+            "password": os.getenv("DEVICE_PASS", ""),
+            "conn_timeout": min(timeout, 10),
+            "auth_timeout": min(timeout, 10),
+        }
+
+        try:
+            with ConnectHandler(**params) as conn:
+                output = conn.send_command(
+                    command,
+                    read_timeout=timeout,
+                    strip_prompt=False,
+                )
+            return {
+                "device": device.ip, "command": command,
+                "raw_output": output,
+                "success": True, "error": "",
+            }
+        except (NetmikoTimeoutException, socket.timeout, OSError):
+            return {
+                "device": device.ip, "command": command,
+                "raw_output": "", "success": False,
+                "error": "Connection timeout",
+                "unreachable": True,
+            }
+        except NetmikoAuthenticationException as e:
+            return {
+                "device": device.ip, "command": command,
+                "raw_output": "", "success": False,
+                "error": f"Authentication failed: {e}",
+                "unreachable": True,
+            }
 
     def summarize(
         self,
