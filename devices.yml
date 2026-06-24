@@ -1,0 +1,19 @@
+# 网络设备清单——编辑这个文件来添加你的设备
+# Agent 启动时自动读取并注册到CMDB
+
+devices:
+  - ip: "10.0.0.1"
+    hostname: "core-sw-1"
+    vendor: "cisco"      # cisco / huawei / h3c / juniper
+    role: "core"         # core / access / ap
+
+  - ip: "10.0.0.10"
+    hostname: "acc-sw-1"
+    vendor: "huawei"
+    role: "access"
+
+  # 添加你的设备：
+  # - ip: "192.168.56.101"
+  #   hostname: "eve-r1"
+  #   vendor: "cisco"
+  #   role: "core"
