@@ -61,6 +61,9 @@ COMMAND_TEMPLATES: dict[str, list[str]] = {
         "display logbuffer",
         "display ospf peer",
         "display bgp peer",
+        "display current-configuration configuration ospf",
+        "display ip routing-table",
+        "display ospf interface",
     ],
 }
 

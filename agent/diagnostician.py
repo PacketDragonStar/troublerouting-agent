@@ -111,18 +111,27 @@ class Diagnostician:
 
         # 解析 JSON 响应
         try:
-            # 提取 JSON 块
-            if "```json" in response:
-                response = response.split("```json")[1].split("```")[0]
-            elif "```" in response:
-                response = response.split("```")[1].split("```")[0]
-            result = json.loads(response.strip())
+            # 多种方式提取 JSON
+            cleaned = response.strip()
+            # 1. 尝试 markdown code block
+            if "```json" in cleaned:
+                cleaned = cleaned.split("```json")[1].split("```")[0]
+            elif "```" in cleaned:
+                parts = cleaned.split("```")
+                if len(parts) >= 3:
+                    cleaned = parts[1]  # 取第一个code block内容
+            # 2. 尝试提取 { ... } 块
+            if "{" in cleaned:
+                start = cleaned.index("{")
+                end = cleaned.rindex("}") + 1
+                cleaned = cleaned[start:end]
+            result = json.loads(cleaned.strip())
             print(f"  [LLM] 分析完成: {result.get('root_cause', '')[:80]}...", flush=True)
             return result
-        except (json.JSONDecodeError, KeyError, IndexError):
+        except (json.JSONDecodeError, KeyError, IndexError, ValueError):
             print(f"  [LLM] JSON 解析失败，使用原始回复", flush=True)
             return {
-                "root_cause": response[:500],
+                "root_cause": response[:800],
                 "confidence": 0.60,
                 "evidence": [],
             }
