@@ -1,9 +1,27 @@
 """CLI 入口——命令行启动一次网络排障"""
 import asyncio
+import os
 import sys
 from agent.agents import run_troubleshooting
 from agent.cmdb import CMDB
 from agent.device_loader import load_devices_from_yaml
+
+# 加载 .env 文件到 os.environ（Python 不会自动读 .env）
+def _load_env_file(path=".env"):
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            key = key.strip()
+            val = val.strip()
+            if key and key not in os.environ:
+                os.environ[key] = val
+
+_load_env_file()
 
 
 def main():
