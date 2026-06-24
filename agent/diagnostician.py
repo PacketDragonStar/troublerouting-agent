@@ -81,19 +81,26 @@ class Diagnostician:
                         session_id=session_id,
                     )
 
-                # OSPF 检测
-                if "ospf" in combined and ("down" in raw_lower or "init" in raw_lower or "dead" in raw_lower):
-                    return DiagnosisResult(
-                        root_cause="OSPF 邻居状态异常——可能原因：Hello 参数不匹配、MTU 不一致、认证失败",
-                        confidence=0.75,
-                        evidence=[f"{device_ip}: OSPF 邻居异常"],
-                        session_id=session_id,
-                    )
+                # OSPF 检测——在接口 Down 之前，避免被 "down" 误捕
+                if "ospf" in combined:
+                    if "down" in raw_lower or "init" in raw_lower or "dead" in raw_lower:
+                        return DiagnosisResult(
+                            root_cause="OSPF 邻居状态异常——可能原因：Hello 参数不匹配、MTU 不一致、认证失败",
+                            confidence=0.75,
+                            evidence=[f"{device_ip}: OSPF 邻居异常"],
+                            session_id=session_id,
+                        )
+                    if "not configured" in raw_lower or "not enabled" in raw_lower:
+                        return DiagnosisResult(
+                            root_cause=f"设备 {device_ip} 未配置 OSPF——OSPF 进程未启用，请检查配置",
+                            confidence=0.95,
+                            evidence=[f"{device_ip}: OSPF 未配置"],
+                            session_id=session_id,
+                        )
 
-                # 接口 Down 检测
+                # 接口 Down 检测——只匹配明确的 Down 状态，避免误报
                 if ("current state : down" in raw_lower
-                        or "line protocol is down" in raw_lower
-                        or ("down" in raw_lower and "interface" in combined)):
+                        or "line protocol is down" in raw_lower):
                     return DiagnosisResult(
                         root_cause="接口状态为 DOWN——可能原因：对端故障、线缆断开、管理性 shutdown",
                         confidence=0.80,
