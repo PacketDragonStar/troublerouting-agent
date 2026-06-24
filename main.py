@@ -36,7 +36,7 @@ def main():
 
     fault = sys.argv[1]
     print(f"🔍 开始排障: {fault}")
-    report = asyncio.run(run_troubleshooting(fault))
+    report = asyncio.run(run_troubleshooting(fault, cmdb=cmdb))
     print(f"✅ 诊断完成")
     print(f"   Session ID: {report.session_id}")
     print(f"   根因: {report.root_cause}")

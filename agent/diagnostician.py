@@ -60,16 +60,17 @@ class Diagnostician:
                 # combined: 命令名 + 输出，用于 OSPF/BGP 等命令名中包含关键词的场景
                 combined = cmd + " " + raw_lower
 
-                # CRC 错误
+                # CRC 错误——只有 CRC 计数 > 0 才触发
                 if "crc" in raw_lower:
                     nums = re.findall(r"\d+", raw)
                     crc_count = int(nums[0]) if nums else 0
-                    return DiagnosisResult(
-                        root_cause=f"接口存在大量 CRC 错误（{crc_count}），疑似光模块老化或线缆故障",
-                        confidence=0.85,
-                        evidence=[f"{device_ip}: CRC 错误 {crc_count}"],
-                        session_id=session_id,
-                    )
+                    if crc_count > 0:
+                        return DiagnosisResult(
+                            root_cause=f"接口存在大量 CRC 错误（{crc_count}），疑似光模块老化或线缆故障",
+                            confidence=0.85,
+                            evidence=[f"{device_ip}: CRC 错误 {crc_count}"],
+                            session_id=session_id,
+                        )
 
                 # BGP 检测
                 if "bgp" in combined and ("idle" in raw_lower or "active" in raw_lower or "notification" in raw_lower):

@@ -36,5 +36,5 @@ def load_devices_from_yaml(cmdb: CMDB, yaml_path: str = "devices.yml") -> int:
         )
         count += 1
 
-    print(f"✅ 从 {yaml_path} 加载了 {count} 台设备到 CMDB")
+    print(f"[OK] 从 {yaml_path} 加载了 {count} 台设备到 CMDB")
     return count
