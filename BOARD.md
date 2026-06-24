@@ -112,8 +112,16 @@
    完成 commit: 49cef2d
    - 依赖：Ticket 8（StateStore）
 
-- [ ] Ticket 14: Deep Agents 框架迁移评估与 POC
-- [ ] Ticket 15: Docker Compose / K8s 容器化部署
+- [x] **Ticket 15: Docker Compose 容器化部署**  
+  Dockerfile + agent 服务加入 docker-compose.yml，支持一键 `docker-compose up -d` 启动全栈。  
+  验收：`tests/test_docker.py` 7 passed。  
+  完成 commit: 6adffe0  
+  - 依赖：无
+
+- [x] **Ticket 14: Deep Agents 框架迁移评估与 POC**  
+  完成 LangChain Deep Agents 迁移评估报告。结论：**暂不迁移**——Demo 5个场景中3个确定性故障无增值，Safety Officer 硬编码保证不可削弱。保留 `TroubleshootingPipeline` Strategy 接口作为未来切换点。  
+  完成 commit: 1c90c01  
+  - 依赖：无
 - [ ] Ticket 16: 真实工单系统（ServiceNow/Jira）对接
 - [ ] Ticket 17: 闭环自动验证（监控回查 CRC/告警消除）
 - [ ] Ticket 18: 大规模网络（>50 设备）性能压测

@@ -2,16 +2,31 @@
 # Agent 启动时自动读取并注册到CMDB
 
 devices:
-  - ip: "10.0.0.1"
+  - ip: "192.168.41.88"
     hostname: "core-sw-1"
-    vendor: "cisco"      # cisco / huawei / h3c / juniper
+    vendor: "h3c"      # cisco / huawei / h3c / juniper
     role: "core"         # core / access / ap
 
-  - ip: "10.0.0.10"
-    hostname: "acc-sw-1"
-    vendor: "huawei"
+  - ip: "192.168.41.12"
+    hostname: "acc-rou-2"
+    vendor: "h3c"
     role: "access"
-
+  - ip: "192.168.41.14"
+    hostname: "core-rou-4"
+    vendor: "h3c"
+    role: "access"
+  - ip: "192.168.41.15"
+    hostname: "core-rou-5"
+    vendor: "h3c"
+    role: "access"
+  - ip: "192.168.41.16"
+    hostname: "core-rou-6"
+    vendor: "h3c"
+    role: "access"
+  - ip: "192.168.41.17"
+    hostname: "acc-rou-7"
+    vendor: "h3c"
+    role: "access"
   # 添加你的设备：
   # - ip: "192.168.56.101"
   #   hostname: "eve-r1"

@@ -2,6 +2,8 @@
 import asyncio
 import sys
 from agent.agents import run_troubleshooting
+from agent.cmdb import CMDB
+from agent.device_loader import load_devices_from_yaml
 
 
 def main():
@@ -9,6 +11,10 @@ def main():
         print("用法: python main.py \"故障描述\"")
         print("示例: python main.py \"核心交换机 10.0.0.1 OSPF 邻居断开\"")
         sys.exit(1)
+
+    # 初始化 CMDB + 加载 devices.yml
+    cmdb = CMDB()
+    load_devices_from_yaml(cmdb)
 
     fault = sys.argv[1]
     print(f"🔍 开始排障: {fault}")
