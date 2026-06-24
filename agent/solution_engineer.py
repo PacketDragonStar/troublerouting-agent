@@ -30,6 +30,8 @@ class SolutionEngineer:
     ) -> Optional[dict[str, Any]]:
         """调用 LLM 生成具体修复方案"""
         import json
+        from .safety_officer import SafetyOfficer
+        blocked = ", ".join(SafetyOfficer.BLOCKED_COMMANDS)
         prompt = f"""你是网络排障专家。根据诊断结果生成修复方案。
 
 ### 诊断结果
@@ -42,6 +44,7 @@ class SolutionEngineer:
 2. 如果涉及多台设备，列出每台设备上需要执行的命令
 3. 给出风险评级（low/medium/high）
 4. 如果命令有破坏性，必须警告
+5. 禁止使用以下命令（会被安全规则拦截）：{blocked}
 
 返回 JSON 格式:
 {{"commands":["命令1","命令2"],"risk_level":"medium","description":"说明","warnings":[],"rollback":["回滚命令"]}}
