@@ -71,7 +71,7 @@ class Diagnostician:
                         session_id=session_id,
                     )
 
-                # BGP 检测（命令名或输出含 bgp + idle/active/notification）
+                # BGP 检测
                 if "bgp" in combined and ("idle" in raw_lower or "active" in raw_lower or "notification" in raw_lower):
                     return DiagnosisResult(
                         root_cause="BGP Peer 未建立——可能原因：AS Number 错误、TCP 179 不通、邻居 IP 不可达",
@@ -89,7 +89,7 @@ class Diagnostician:
                         session_id=session_id,
                     )
 
-                # 接口 Down 检测（多种模式）
+                # 接口 Down 检测
                 if ("current state : down" in raw_lower
                         or "line protocol is down" in raw_lower
                         or ("down" in raw_lower and "interface" in combined)):
@@ -99,6 +99,58 @@ class Diagnostician:
                         evidence=[f"{device_ip}: 接口 DOWN"],
                         session_id=session_id,
                     )
+
+        # 3. 未匹配到已知模式——从故障描述中推断意图
+        return self._diagnose_from_fault_description(fault_summary, evidence, session_id)
+
+    def _diagnose_from_fault_description(
+        self, fault_summary: str, evidence: list[str], session_id: str
+    ) -> DiagnosisResult:
+        """从故障描述文本中推断根因（规则引擎未匹配时的兜底策略）
+
+        在接入 LLM 诊断之前，先用关键词匹配故障描述给出更智能的结论，
+        而不是永远输出"未检测到已知故障模式"。
+        """
+        summary_lower = fault_summary.lower()
+
+        if "ospf" in summary_lower:
+            return DiagnosisResult(
+                root_cause="OSPF 邻居状态异常——可能原因：Hello 参数不匹配、MTU 不一致、认证失败。"
+                "请检查 display ospf peer 输出确认具体邻接状态。",
+                confidence=0.70,
+                evidence=evidence,
+                session_id=session_id,
+            )
+        if "bgp" in summary_lower:
+            return DiagnosisResult(
+                root_cause="BGP Peer 未建立——可能原因：AS Number 错误、TCP 179 不通、邻居 IP 不可达。"
+                "请检查 display bgp peer 输出确认具体状态。",
+                confidence=0.72,
+                evidence=evidence,
+                session_id=session_id,
+            )
+        if "dhcp" in summary_lower:
+            return DiagnosisResult(
+                root_cause="DHCP 服务异常——可能原因：DHCP 服务器不可达、地址池耗尽、中继配置错误。",
+                confidence=0.65,
+                evidence=evidence,
+                session_id=session_id,
+            )
+        if "stp" in summary_lower or "生成树" in summary_lower:
+            return DiagnosisResult(
+                root_cause="STP 拓扑变化——可能原因：Bridge Priority 变更、链路抖动、根桥切换。",
+                confidence=0.65,
+                evidence=evidence,
+                session_id=session_id,
+            )
+        if "down" in summary_lower or "断开" in summary_lower:
+            return DiagnosisResult(
+                root_cause="接口或链路状态异常——可能原因：物理层故障、对端设备问题、管理性 shutdown。"
+                "请检查 display interface 输出确认具体接口状态。",
+                confidence=0.60,
+                evidence=evidence,
+                session_id=session_id,
+            )
 
         return DiagnosisResult(
             root_cause="未检测到已知故障模式，需补充数据排查",
@@ -120,9 +172,11 @@ class Diagnostician:
         vendor = device.vendor.lower()
         extra = {
             1: {"cisco": ["show interfaces counters errors", "show ip ospf neighbor"],
-                "huawei": ["display interface counters error", "display ospf peer"]},
+                "huawei": ["display interface counters error", "display ospf peer"],
+                "h3c": ["display interface counters error", "display ospf peer"]},
             2: {"cisco": ["show ip bgp summary", "show logging"],
-                "huawei": ["display bgp peer", "display logbuffer"]},
+                "huawei": ["display bgp peer", "display logbuffer"],
+                "h3c": ["display bgp peer", "display logbuffer"]},
             3: {"cisco": ["show tech-support"], "huawei": ["display diagnostic-information"]},
         }
         cmds = extra.get(iteration, {}).get(vendor, ["show version"])

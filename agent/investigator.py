@@ -53,6 +53,15 @@ COMMAND_TEMPLATES: dict[str, list[str]] = {
         "show system memory",
         "show log messages",
     ],
+    "h3c": [
+        "display interface",
+        "display version",
+        "display cpu-usage",
+        "display memory-usage",
+        "display logbuffer",
+        "display ospf peer",
+        "display bgp peer",
+    ],
 }
 
 
