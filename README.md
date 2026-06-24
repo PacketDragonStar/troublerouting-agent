@@ -6,38 +6,53 @@
 
 ---
 
-## 5 分钟快速启动
+## 快速启动
 
-### 前置条件
+> 所有命令都在项目根目录 `troublerouting_agent/` 下执行。
 
-- Python 3.9+
-- Docker（Redis + Chroma 底座）
-- eNSP 或 HCL 网络模拟器（可选——Demo 阶段用 Mock 数据也能跑通测试）
-
-### 启动
+### 1. 安装依赖
 
 ```bash
-# 1. 配置密钥（只需要 LLM API Key）
-cp .env.example .env
-# 编辑 .env: LLM_API_KEY=sk-xxx
-
-# 2. 启动底座
-docker-compose up -d
-
-# 3. 安装依赖
+# 在项目根目录下
 pip install -e ".[dev]"
-
-# 4. 验证
-python -m pytest tests/ -q
 ```
 
-### 运行一次排障
+### 2. 配置 LLM API Key
+
+```bash
+cp .env.example .env
+# 编辑 .env，填入: LLM_API_KEY=sk-你的密钥
+```
+
+### 3. 启动底座服务（Redis + Chroma）
+
+**Docker 在这做什么？** Redis 存 Agent 对话状态，Chroma 存历史故障案例的向量数据。代码里 `agent/agents.py` 调 Redis，`agent/case_library.py` 调 Chroma。
+
+**二选一：**
+
+| 你的环境 | 命令 |
+|---------|------|
+| 有 Docker Desktop（Hyper-V 开着） | `docker-compose up -d` |
+| 用 HCL/eNSP（Hyper-V 关了，Docker 不能用） | 看 `docs/OPS.md` 第 2 节——装 Windows 原生 Redis + Chroma |
+
+**如果暂时什么都不装**，Agent 也能跑——Investigator 会自动降级为 Mock 模式（返回假数据），不影响测试和 Demo 演示。
+
+### 4. 验证
+
+```bash
+python -m pytest tests/ -q
+# 期望输出: 129 passed in 0.xxs
+```
+
+### 5. 运行一次排障
 
 ```bash
 python -m agent.agents "核心交换机 10.0.0.1 OSPF 邻居断开"
 ```
 
 输出：`reports/report_{session_id}.md` + 案例草稿 JSON。
+
+> **不需要网络模拟器也能跑。** Demo 阶段 Investigator 用 Mock 数据（不连真实设备），Diagnostician 照样能输出诊断结果。接入真实 eNSP/HCL/EVE-NG 设备的方法见 `docs/OPS.md` 第 1 节。
 
 ---
 
