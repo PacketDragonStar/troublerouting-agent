@@ -47,10 +47,12 @@ python -m pytest tests/ -q
 ### 5. 运行一次排障
 
 ```bash
-python -m agent.agents "核心交换机 10.0.0.1 OSPF 邻居断开"
+python main.py "核心交换机 10.0.0.1 OSPF 邻居断开"
 ```
 
 输出：`reports/report_{session_id}.md` + 案例草稿 JSON。
+
+> **注意：** 之前 README 里写的 `python -m agent.agents` 不生效——`agents.py` 没有 `__main__` 入口。已通过 `main.py` 修复。
 
 > **不需要网络模拟器也能跑。** Demo 阶段 Investigator 用 Mock 数据（不连真实设备），Diagnostician 照样能输出诊断结果。接入真实 eNSP/HCL/EVE-NG 设备的方法见 `docs/OPS.md` 第 1 节。
 

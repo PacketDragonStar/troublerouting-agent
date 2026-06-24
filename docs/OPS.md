@@ -146,8 +146,9 @@ CHROMA_PORT=8000
 | 服务 | 检查命令 | 期望输出 |
 |------|---------|---------|
 | Redis | `redis-cli ping` | PONG |
-| Chroma | `curl http://localhost:8001/api/v1/heartbeat` | 心跳 JSON |
-| Agent | `python -m pytest tests/ -q` | 97 passed |
+| Chroma (Docker版) | `curl http://localhost:8001/api/v2/heartbeat` | 心跳 JSON |
+| Chroma (原生版) | `curl http://localhost:8000/api/v2/heartbeat` | 心跳 JSON |
+| Agent | `python -m pytest tests/ -q` | 127 passed |
 | SQLite | `sqlite3 data/troublerouting.db "PRAGMA integrity_check"` | ok |
 
 ---
