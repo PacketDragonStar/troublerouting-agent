@@ -23,7 +23,10 @@ class StateStore:
     backend: "sqlite" (默认) 或 "mysql"
     """
 
-    def __init__(self, backend: str = "sqlite", db_path: str = "data/troublerouting.db"):
+    def __init__(self, backend: str = "", db_path: str = "data/troublerouting.db"):
+        """初始化 StateStore，自动从 STATE_BACKEND 环境变量选择后端"""
+        if not backend:
+            backend = os.getenv("STATE_BACKEND", "sqlite")
         self.backend = backend
         self.db_path = db_path
         self._conn = None

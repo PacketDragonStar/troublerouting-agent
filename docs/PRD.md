@@ -201,6 +201,7 @@
 - 设备数据 → `collected_data` 表
 - 诊断结论 → `diagnosis` 表
 - Agent 不依赖对话历史传递数据，每次都从 DB 读取
+- **后端支持**：SQLite（默认，零配置 Demo）/ MySQL（生产环境，需手动建库 `CREATE DATABASE troublerouting`）。切换方式：`.env` 中设置 `STATE_BACKEND=mysql`
 
 ---
 

@@ -154,11 +154,40 @@ CHROMA_PORT=8000
 
 ## 4. 数据库备份与恢复
 
-### 备份
+### 4.1 选择后端（SQLite vs MySQL）
+
+| | SQLite（默认） | MySQL |
+|------|---------|------|
+| 适用场景 | Demo / 单机测试 | 生产 / 多 Agent 并发 |
+| 配置 | 零配置，自动创建文件 | 需手动建库 + 改 `.env` |
+| 并发 | 写锁排队 | 行级锁 + 连接池 |
+| 备份 | 复制 `data/troublerouting.db` | `mysqldump` / 主从复制 |
+
+**切换到 MySQL：**
+
+```bash
+# 1. 建库（只做一次）
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS troublerouting DEFAULT CHARSET utf8mb4;"
+
+# 2. 改 .env
+STATE_BACKEND=mysql
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASS=你的密码
+MYSQL_DB=troublerouting
+
+# 3. 重启 Agent——表结构自动创建（CREATE TABLE IF NOT EXISTS）
+```
+
+### 4.2 备份
 
 ```bash
 # SQLite
 cp data/troublerouting.db "backups/troublerouting_$(date +%Y%m%d_%H%M%S).db"
+
+# MySQL
+mysqldump -u root -p troublerouting > "backups/troublerouting_$(date +%Y%m%d_%H%M%S).sql"
 
 # Redis（Docker 版）
 docker exec troublerouting-redis redis-cli BGSAVE
