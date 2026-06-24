@@ -1,9 +1,10 @@
 """AutoGen GroupChat 骨架 + 6 Agent 定义 + 真实编排器
 
-Phase 2: 已接入 Dispatcher → Investigator → Diagnostician → Solution → Safety → Reporter 全链路。
+Phase 2: 已接入 Dispatcher -> Investigator -> Diagnostician -> Solution -> Safety -> Reporter 全链路。
 """
 
 import asyncio
+import os
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
@@ -21,14 +22,12 @@ from mcp.command_whitelist import CommandWhitelist
 
 @dataclass
 class Agent:
-    """Agent 定义"""
     name: str
     role: str
     description: str
 
 
 def create_agents() -> list[Agent]:
-    """创建 6 个 Agent 并返回列表"""
     return [
         Agent(name="Dispatcher", role="调度员", description="接收故障报告，提取关键信息，Fast/Slow 分流"),
         Agent(name="Investigator", role="调查员", description="执行只读网络诊断命令，收集设备数据"),
@@ -39,18 +38,11 @@ def create_agents() -> list[Agent]:
     ]
 
 
-# ---- 真实编排器 ----
-
 async def run_troubleshooting(
     fault_description: str,
     fast_path: bool = False,
     cmdb: Optional[CMDB] = None,
 ) -> "TroubleshootingReport":
-    """执行一次完整排障流程（接入真实组件链）
-
-    Dispatcher(分流) → Investigator(采集) → Diagnostician(诊断)
-    → Solution(方案) → Safety(审核) → Reporter(报告)
-    """
     from agent.pipeline import TroubleshootingReport
 
     session_id = f"session-{uuid.uuid4().hex[:12]}"
@@ -60,20 +52,19 @@ async def run_troubleshooting(
     whitelist = CommandWhitelist()
     agent_trace: list[dict[str, Any]] = []
 
-    # ---- 1. Dispatcher：解析故障 + 分流 ----
+    # 1. Dispatcher
     dispatcher = Dispatcher(cmdb)
     summary = dispatcher.dispatch(fault_description)
     agent_trace.append({
         "agent": "Dispatcher", "role": "调度员",
-        "response": f"路径={summary.path}, 设备={summary.devices}",
+        "response": f"path={summary.path}, devices={summary.devices}",
         "timestamp": datetime.now().isoformat(),
     })
 
-    # ---- 2. Investigator：并行采集数据 ----
+    # 2. Investigator
     investigator = Investigator(whitelist=whitelist)
     devices = [d for d in summary.device_records]
     if not devices:
-        # 回退：从 CMDB 全量查找
         devices = [
             record for record in [cmdb.lookup(ip) for ip in summary.devices]
             if record is not None
@@ -83,14 +74,14 @@ async def run_troubleshooting(
         investigator_summary = investigator.summarize(collected, session_id)
     else:
         collected = {}
-        investigator_summary = "未找到匹配设备，无法采集数据"
+        investigator_summary = "no devices found"
     agent_trace.append({
         "agent": "Investigator", "role": "调查员",
         "response": investigator_summary[:200],
         "timestamp": datetime.now().isoformat(),
     })
 
-    # ---- 3. Diagnostician：诊断 ----
+    # 3. Diagnostician
     diagnostician = Diagnostician(cmdb=cmdb)
     diagnosis = diagnostician.diagnose(
         fault_summary=fault_description,
@@ -99,30 +90,30 @@ async def run_troubleshooting(
     )
     agent_trace.append({
         "agent": "Diagnostician", "role": "诊断专家",
-        "response": f"根因={diagnosis.root_cause[:100]}, 置信度={diagnosis.confidence:.0%}",
+        "response": f"{diagnosis.root_cause[:100]} (confidence={diagnosis.confidence:.0%})",
         "timestamp": datetime.now().isoformat(),
     })
 
-    # ---- 4. Solution Engineer：生成修复方案 ----
+    # 4. Solution Engineer
     engineer = SolutionEngineer()
     target_device = summary.device_records[0].hostname if summary.device_records else "unknown"
     plan = engineer.generate(diagnosis.root_cause, diagnosis.confidence, target_device)
     agent_trace.append({
         "agent": "Solution", "role": "方案工程师",
-        "response": f"风险={plan.get('risk_level', 'unknown')}, 命令数={len(plan.get('commands', []))}",
+        "response": f"risk={plan.get('risk_level', 'unknown')}, commands={len(plan.get('commands', []))}",
         "timestamp": datetime.now().isoformat(),
     })
 
-    # ---- 5. Safety Officer：安全审核 ----
+    # 5. Safety Officer
     officer = SafetyOfficer()
     review = officer.review(plan.get("commands", []), plan.get("risk_level", "low"), target_device)
     agent_trace.append({
         "agent": "Safety", "role": "安全审计官",
-        "response": f"审核结果={'通过' if review.get('approved') else '拒绝'}",
+        "response": f"approved={review.get('approved', False)}",
         "timestamp": datetime.now().isoformat(),
     })
 
-    # ---- 6. Reporter：生成报告 ----
+    # 6. Reporter + webhook
     reporter = Reporter()
     report = TroubleshootingReport(
         session_id=session_id,
@@ -136,9 +127,24 @@ async def run_troubleshooting(
     reporter.save_report(report)
     reporter.save_case_draft(report)
 
+    webhook_sent = "WEBHOOK_URL not set"
+    if os.getenv("WEBHOOK_URL"):
+        from agent.webhook import WebhookClient
+        client = WebhookClient()
+        result = client.send({
+            "session_id": report.session_id,
+            "fault_description": report.fault_description,
+            "root_cause": report.root_cause,
+            "confidence": report.confidence,
+            "risk_level": report.risk_level,
+            "solution": report.solution,
+            "created_at": report.created_at,
+        })
+        webhook_sent = f"webhook sent: {result.get('status_code', 0)}"
+
     agent_trace.append({
         "agent": "Reporter", "role": "报告员",
-        "response": f"report_{session_id}.md + case_{session_id}.json saved",
+        "response": f"report_{session_id}.md saved, {webhook_sent}",
         "timestamp": datetime.now().isoformat(),
     })
 

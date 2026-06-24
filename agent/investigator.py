@@ -161,9 +161,13 @@ class Investigator:
         # 尝试 Netmiko 真实连接（只在有凭证时）
         if os.getenv("DEVICE_USER"):
             try:
+                print(f"  [SSH] {device.ip}:{command[:40]}...", flush=True)
                 return self._execute_single_command_real(device, command, timeout)
-            except Exception:
+            except Exception as e:
+                print(f"  [SSH-FAIL] {device.ip}:{command[:40]} -> {e}", flush=True)
                 pass
+        else:
+            print(f"  [MOCK] DEVICE_USER 未设置，设备 {device.ip} 走 Mock 模式", flush=True)
 
         # 降级为 Mock
         return {

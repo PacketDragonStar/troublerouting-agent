@@ -35,9 +35,9 @@ def main():
     load_devices_from_yaml(cmdb)
 
     fault = sys.argv[1]
-    print(f"🔍 开始排障: {fault}")
+    print(f"[START] 开始排障: {fault}")
     report = asyncio.run(run_troubleshooting(fault, cmdb=cmdb))
-    print(f"✅ 诊断完成")
+    print(f"[OK] 诊断完成")
     print(f"   Session ID: {report.session_id}")
     print(f"   根因: {report.root_cause}")
     print(f"   置信度: {report.confidence:.0%}")
