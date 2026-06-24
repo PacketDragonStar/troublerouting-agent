@@ -6,6 +6,13 @@
 # Requires reboot to take effect
 # ============================================================
 
+# Check admin rights
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "ERROR: This script requires Administrator privileges." -ForegroundColor Red
+    Write-Host "Please right-click PowerShell and select 'Run as Administrator', then try again." -ForegroundColor Yellow
+    exit 1
+}
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Switch to: Docker Desktop Mode" -ForegroundColor Cyan
 Write-Host "  Works with: Docker Desktop / WSL2" -ForegroundColor Green

@@ -76,7 +76,7 @@ class TestParallelExecution:
     @pytest.mark.asyncio
     async def test_unreachable_device_returns_signal(self, investigator, sample_devices):
         """设备不可达：返回 unreachable 信号"""
-        async def mock_execute(device, cmd, timeout):
+        def mock_execute(device, cmd, timeout):
             if device.ip == "10.0.0.10":
                 return {
                     "device": device.ip, "command": cmd,

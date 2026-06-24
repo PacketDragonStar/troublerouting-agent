@@ -100,8 +100,10 @@
   完成 commit: c05ecf4
   - 依赖：Ticket 20（Netmiko）
 
-- [ ] Ticket 19: RAG 知识库（Chroma 向量检索落地）
+- [x] **Ticket 19: RAG 知识库（Chroma 向量检索落地）**
   CaseLibrary.search() 从子串匹配升级为 Chroma 语义检索，接入 Embedding 模型，confirm() 自动向量化入库。Chroma 不可用时降级子串匹配。
+  验收：`tests/test_rag.py` 10 passed.
+  完成 commit: 15c5a93
   - 依赖：Ticket 11（CaseLibrary）
 
 - [ ] Ticket 14: Deep Agents 框架迁移评估与 POC
