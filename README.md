@@ -24,7 +24,21 @@ cp .env.example .env
 # 编辑 .env，填入: LLM_API_KEY=sk-你的密钥
 ```
 
-### 3. 启动底座服务（Redis + Chroma）
+### 3. 配置你的网络设备
+
+编辑根目录下的 **`devices.yml`** 文件，填入你的设备 IP、厂商和角色：
+
+```yaml
+devices:
+  - ip: "10.0.0.1"
+    hostname: "core-sw-1"
+    vendor: "cisco"
+    role: "core"
+```
+
+> 不需要网络模拟器也能跑——Agent 会自动降级为 Mock 模式。
+
+### 4. 启动底座服务（Redis + Chroma）
 
 **Docker 在这做什么？** Redis 存 Agent 对话状态，Chroma 存历史故障案例的向量数据。代码里 `agent/agents.py` 调 Redis，`agent/case_library.py` 调 Chroma。
 
