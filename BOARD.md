@@ -101,10 +101,16 @@
   - 依赖：Ticket 20（Netmiko）
 
 - [x] **Ticket 19: RAG 知识库（Chroma 向量检索落地）**
-  CaseLibrary.search() 从子串匹配升级为 Chroma 语义检索，接入 Embedding 模型，confirm() 自动向量化入库。Chroma 不可用时降级子串匹配。
-  验收：`tests/test_rag.py` 10 passed.
-  完成 commit: 15c5a93
-  - 依赖：Ticket 11（CaseLibrary）
+   CaseLibrary.search() 从子串匹配升级为 Chroma 语义检索，接入 Embedding 模型，confirm() 自动向量化入库。Chroma 不可用时降级子串匹配。
+   验收：`tests/test_rag.py` 10 passed.
+   完成 commit: 15c5a93
+   - 依赖：Ticket 11（CaseLibrary）
+
+- [x] **Ticket 21: StateStore SQLite → MySQL 双后端**
+   StateStore 支持 `backend="mysql"`，建表自动初始化（`CREATE TABLE IF NOT EXISTS`），SQLite 100% 向后兼容。MySQL 需提前手动 `CREATE DATABASE troublerouting`。
+   验收：`tests/test_state_store.py` 6 passed + `tests/test_mysql_store.py` 7 passed/6 skipped（MySQL 测试需配置 MYSQL_* 环境变量）。
+   完成 commit: 49cef2d
+   - 依赖：Ticket 8（StateStore）
 
 - [ ] Ticket 14: Deep Agents 框架迁移评估与 POC
 - [ ] Ticket 15: Docker Compose / K8s 容器化部署
