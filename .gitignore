@@ -16,6 +16,8 @@ venv/
 # Data
 data/*.db
 logs/*.log
+*.msi
+chroma_data/
 
 # IDE
 .vscode/settings.json
