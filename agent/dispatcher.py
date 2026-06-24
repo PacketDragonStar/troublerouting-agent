@@ -20,12 +20,11 @@ from .cmdb import CMDB, DeviceRecord
 class FaultSummary:
     """故障摘要"""
     raw_text: str
-    devices: list[str] = field(default_factory=list)  # 提取到的 IP 列表
+    devices: list[str] = field(default_factory=list)
     device_records: list[DeviceRecord] = field(default_factory=list)
-    path: str = "slow"  # "fast" 或 "slow"
+    path: str = "slow"
 
 
-# 正则：匹配 IPv4 地址
 IP_PATTERN = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 
@@ -36,54 +35,56 @@ class Dispatcher:
         self.cmdb = cmdb
 
     def dispatch(self, raw_text: str) -> FaultSummary:
-        """解析故障报告，生成故障摘要和分流决策
-
-        Args:
-            raw_text: 自然语言故障描述
-
-        Returns:
-            FaultSummary: 包含设备列表、CMDB 记录、分流路径
-        """
+        """解析故障报告，生成故障摘要和分流决策"""
         summary = FaultSummary(raw_text=raw_text)
 
-        # 1. 提取 IP 地址
+        # 1. 正则提取完整 IP 地址
         ips = IP_PATTERN.findall(raw_text)
-        # 过滤无效 IP（如 0.0.0.0、999.999.999.999）
         valid_ips = [ip for ip in ips if self._is_valid_ip(ip)]
-        summary.devices = valid_ips
 
-        # 2. 查询 CMDB
-        for ip in valid_ips:
+        # 2. 智能补全短 IP（如 192.168.41.12,14,16 → 3 个 IP）
+        expanded_ips = self._expand_short_ips(raw_text, valid_ips)
+        summary.devices = expanded_ips
+
+        # 3. 查询 CMDB
+        for ip in expanded_ips:
             record = self.cmdb.lookup(ip)
             if record:
                 summary.device_records.append(record)
 
-        # 3. 分流决策（规则引擎）
+        # 4. 分流决策
         summary.path = self._decide_path(summary.device_records)
-
         return summary
 
+    # ---- private ----
+
     def _decide_path(self, records: list[DeviceRecord]) -> str:
-        """规则引擎：依据设备角色决定路径
-
-        - 任何 core 设备 → slow
-        - 没有查到 CMDB 记录 → slow（保守）
-        - 全是 access/ap → fast
-        """
         if not records:
-            # 没有 CMDB 记录：未知设备，保守走 Slow Path
             return "slow"
-
         for record in records:
             if record.role == "core":
                 return "slow"
-
-        # 所有设备都是 access 或 ap
         return "fast"
 
     @staticmethod
+    def _expand_short_ips(raw_text: str, existing_ips: list[str]) -> list[str]:
+        """将 192.168.41.12,14,16 展开为完整 IP 列表"""
+        m = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.)(\d{1,3}(?:,\d{1,3})+)", raw_text)
+        if m:
+            prefix = m.group(1)
+            suffixes = m.group(2).split(",")
+            expanded = [f"{prefix}{s.strip()}" for s in suffixes]
+            result = []
+            seen = set()
+            for ip in existing_ips + expanded:
+                if ip not in seen:
+                    result.append(ip)
+                    seen.add(ip)
+            return result
+        return existing_ips
+
+    @staticmethod
     def _is_valid_ip(ip: str) -> bool:
-        """校验 IP 地址合法性"""
         parts = ip.split(".")
         if len(parts) != 4:
             return False
